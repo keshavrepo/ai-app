@@ -89,85 +89,143 @@ def home():
     return """
     <html>
     <head>
-        <title>AI Chat</title>
+        <title>HelperShot AI</title>
+
         <style>
             body {
+                margin: 0;
                 font-family: Arial;
                 background: #0f172a;
                 color: white;
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
-                margin: 0;
             }
+
             #chat {
                 flex: 1;
-                padding: 10px;
                 overflow-y: auto;
+                padding: 20px;
             }
+
             .msg {
+                max-width: 65%;
+                padding: 12px;
                 margin: 10px;
-                padding: 10px;
-                border-radius: 10px;
-                max-width: 70%;
+                border-radius: 12px;
+                line-height: 1.5;
             }
+
             .user {
                 background: #2563eb;
-                align-self: flex-end;
+                margin-left: auto;
             }
-            .ai {
+
+            .bot {
                 background: #1e293b;
-                align-self: flex-start;
             }
-            #input {
+
+            #inputBox {
                 display: flex;
+                flex-direction: column;
                 padding: 10px;
                 background: #020617;
             }
-            input {
-                flex: 1;
-                padding: 10px;
-                border-radius: 8px;
-                border: none;
+
+            #row {
+                display: flex;
+                margin-top: 5px;
             }
+
+            input[type="text"] {
+                flex: 1;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                outline: none;
+            }
+
             button {
                 margin-left: 10px;
-                padding: 10px;
+                padding: 12px;
                 background: #22c55e;
                 border: none;
+                color: white;
                 border-radius: 8px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background: #16a34a;
+            }
+
+            input[type="file"] {
+                margin-bottom: 5px;
                 color: white;
             }
         </style>
     </head>
+
     <body>
 
         <div id="chat"></div>
 
-        <div id="input">
-            <input id="msg" placeholder="Ask something..." />
-            <button onclick="send()">Send</button>
+        <div id="inputBox">
+            <input type="file" id="imageInput" />
+
+            <div id="row">
+                <input id="msg" placeholder="Ask anything..." />
+                <button onclick="send()">Send</button>
+                <button onclick="uploadImage()">📷</button>
+            </div>
         </div>
 
         <script>
             async function send() {
-                let msg = document.getElementById("msg").value;
-
+                let input = document.getElementById("msg");
                 let chat = document.getElementById("chat");
 
-                chat.innerHTML += `<div class="msg user">${msg}</div>`;
+                let userMsg = input.value;
+                if (!userMsg) return;
+
+                chat.innerHTML += `<div class='msg user'>${userMsg}</div>`;
+                input.value = "";
 
                 let res = await fetch("/chat", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg })
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({message: userMsg})
                 });
 
                 let data = await res.json();
 
-                chat.innerHTML += `<div class="msg ai">${data.reply}</div>`;
+                chat.innerHTML += `<div class='msg bot'>${data.reply}</div>`;
+                chat.scrollTop = chat.scrollHeight;
+            }
 
-                document.getElementById("msg").value = "";
+            async function uploadImage() {
+                let fileInput = document.getElementById("imageInput");
+                let file = fileInput.files[0];
+
+                if (!file) {
+                    alert("Image select kar bhai");
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("file", file);
+
+                let chat = document.getElementById("chat");
+                chat.innerHTML += `<div class='msg user'>📷 Image Uploaded</div>`;
+
+                let res = await fetch("/analyze", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let data = await res.json();
+
+                chat.innerHTML += `<div class='msg bot'>${data.ai}</div>`;
                 chat.scrollTop = chat.scrollHeight;
             }
         </script>
