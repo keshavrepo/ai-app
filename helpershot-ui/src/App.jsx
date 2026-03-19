@@ -8,7 +8,6 @@ export default function App() {
 
   const chatRef = useRef();
 
-  // AUTO SCROLL
   useEffect(() => {
     chatRef.current?.scrollTo({
       top: chatRef.current.scrollHeight,
@@ -16,11 +15,9 @@ export default function App() {
     });
   }, [messages, loading]);
 
-  // SAFE TYPING FUNCTION
   const typeText = (text) => {
     let i = 0;
 
-    // add empty bot message first
     setMessages((prev) => [...prev, { role: "bot", text: "" }]);
 
     const interval = setInterval(() => {
@@ -38,13 +35,10 @@ export default function App() {
         return updated;
       });
 
-      if (i >= text.length) {
-        clearInterval(interval);
-      }
+      if (i >= text.length) clearInterval(interval);
     }, 20);
   };
 
-  // SEND MESSAGE
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -59,22 +53,15 @@ export default function App() {
       const res = await axios.post(
         "https://helpershot.onrender.com/chat",
         { message: userInput },
-        {
-          timeout: 120000,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { timeout: 120000 }
       );
 
       setLoading(false);
 
-      // fallback safety
       const reply = res?.data?.reply || "No response received";
-
       typeText(reply);
     } catch (err) {
-      console.error("API ERROR:", err);
+      console.error(err);
 
       setMessages((prev) => [
         ...prev,
@@ -85,7 +72,6 @@ export default function App() {
     }
   };
 
-  // IMAGE UPLOAD
   const uploadImage = async (file) => {
     if (!file) return;
 
@@ -102,17 +88,15 @@ export default function App() {
     try {
       const res = await axios.post(
         "https://helpershot.onrender.com/analyze",
-        formData,
-        { timeout: 120000 }
+        formData
       );
 
       setLoading(false);
 
       const reply = res?.data?.ai || "No response";
-
       typeText(reply);
     } catch (err) {
-      console.error("IMAGE ERROR:", err);
+      console.error(err);
 
       setMessages((prev) => [
         ...prev,
@@ -156,8 +140,17 @@ export default function App() {
             fontSize: "18px",
           }}
         >
-          🚀 HelperShot AI
+          🤖 HelperShot AI
         </div>
+        <div style={{
+             padding: "10px",
+             fontSize: "14px",
+             textAlign: "center",
+             opacity: 0.8
+           }}>
+             HelperShot AI is a free AI assistant that helps you solve questions,
+             analyze images, and get instant answers without login.
+          </div>
 
         {/* CHAT */}
         <div
@@ -260,6 +253,26 @@ export default function App() {
           >
             ➤
           </button>
+        </div>
+
+        {/* ✅ FOOTER (FIXED POSITION) */}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "10px",
+            background: "#020617",
+            fontSize: "12px",
+          }}
+        >
+          <a href="/about" style={{ margin: "10px", color: "white" }}>
+            About
+          </a>
+          <a href="/privacy" style={{ margin: "10px", color: "white" }}>
+            Privacy
+          </a>
+          <a href="/contact" style={{ margin: "10px", color: "white" }}>
+            Contact
+          </a>
         </div>
       </div>
     </div>
