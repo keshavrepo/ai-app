@@ -14,7 +14,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # sab allow karega
+    allow_origins=["https://helpershot-ui-new.vercel.app"],  # sab allow karega
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
