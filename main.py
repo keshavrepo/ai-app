@@ -94,7 +94,7 @@ def home():
         <style>
             body {
                 margin: 0;
-                font-family: Arial;
+                font-family: 'Segoe UI', sans-serif;
                 background: #0f172a;
                 color: white;
                 display: flex;
@@ -106,62 +106,83 @@ def home():
                 flex: 1;
                 overflow-y: auto;
                 padding: 20px;
+                display: flex;
+                flex-direction: column;
             }
 
             .msg {
-                max-width: 65%;
-                padding: 12px;
-                margin: 10px;
+                max-width: 70%;
+                padding: 12px 15px;
+                margin: 8px 0;
                 border-radius: 12px;
+                font-size: 14px;
                 line-height: 1.5;
+                animation: fadeIn 0.2s ease-in;
             }
 
             .user {
                 background: #2563eb;
-                margin-left: auto;
+                align-self: flex-end;
             }
 
             .bot {
                 background: #1e293b;
+                align-self: flex-start;
             }
 
             #inputBox {
-                display: flex;
-                flex-direction: column;
                 padding: 10px;
                 background: #020617;
+                border-top: 1px solid #1e293b;
             }
 
             #row {
                 display: flex;
-                margin-top: 5px;
+                align-items: center;
+                gap: 10px;
             }
 
             input[type="text"] {
                 flex: 1;
                 padding: 12px;
                 border: none;
-                border-radius: 8px;
+                border-radius: 10px;
                 outline: none;
+                font-size: 14px;
             }
 
             button {
-                margin-left: 10px;
-                padding: 12px;
-                background: #22c55e;
+                padding: 10px 14px;
+                border-radius: 10px;
                 border: none;
-                color: white;
-                border-radius: 8px;
                 cursor: pointer;
+                font-weight: bold;
             }
 
-            button:hover {
-                background: #16a34a;
+            .sendBtn {
+                background: #22c55e;
+                color: white;
+            }
+
+            .uploadBtn {
+                background: #334155;
+                color: white;
             }
 
             input[type="file"] {
-                margin-bottom: 5px;
-                color: white;
+                display: none;
+            }
+
+            label {
+                background: #334155;
+                padding: 10px;
+                border-radius: 10px;
+                cursor: pointer;
+            }
+
+            @keyframes fadeIn {
+                from {opacity: 0; transform: translateY(5px);}
+                to {opacity: 1; transform: translateY(0);}
             }
         </style>
     </head>
@@ -171,12 +192,14 @@ def home():
         <div id="chat"></div>
 
         <div id="inputBox">
-            <input type="file" id="imageInput" />
 
             <div id="row">
+                <label for="imageInput">📷</label>
+                <input type="file" id="imageInput"/>
+
                 <input id="msg" placeholder="Ask anything..." />
-                <button onclick="send()">Send</button>
-                <button onclick="uploadImage()">📷</button>
+
+                <button class="sendBtn" onclick="send()">Send</button>
             </div>
         </div>
 
@@ -203,20 +226,15 @@ def home():
                 chat.scrollTop = chat.scrollHeight;
             }
 
-            async function uploadImage() {
-                let fileInput = document.getElementById("imageInput");
-                let file = fileInput.files[0];
-
-                if (!file) {
-                    alert("Image select kar bhai");
-                    return;
-                }
-
-                let formData = new FormData();
-                formData.append("file", file);
+            document.getElementById("imageInput").addEventListener("change", async function() {
+                let file = this.files[0];
+                if (!file) return;
 
                 let chat = document.getElementById("chat");
                 chat.innerHTML += `<div class='msg user'>📷 Image Uploaded</div>`;
+
+                let formData = new FormData();
+                formData.append("file", file);
 
                 let res = await fetch("/analyze", {
                     method: "POST",
@@ -227,7 +245,7 @@ def home():
 
                 chat.innerHTML += `<div class='msg bot'>${data.ai}</div>`;
                 chat.scrollTop = chat.scrollHeight;
-            }
+            });
         </script>
 
     </body>
